@@ -44,7 +44,4 @@ def get_lyrics(title, artist):
     lyrics = html.find('div', class_='lyrics').get_text()
     return lyrics
 
-def main():
-    get_song()
-
-main()
+get_song()
