@@ -3,9 +3,8 @@ import spotipy.util as util
 import requests
 from bs4 import BeautifulSoup
 
-#create authorization token and spotify instance
-#username = "22e3uaalu7v2s34d4g7fw2yhy"
 def get_song():
+    #create Spotify authorization token and spotify instance
     SCOPE = "user-read-currently-playing"
     USER = "zliu18"
     URI = 'http://localhost/'
@@ -14,14 +13,19 @@ def get_song():
     token = util.prompt_for_user_token(USER, SCOPE, client_id=ID, client_secret=SECRET, redirect_uri=URI)
     sp = spotipy.Spotify(auth=token)
 
+    #get song and artist info
     curr_track_info = sp.current_user_playing_track()
-    curr_song = curr_track_info['item']['name']
-    curr_artist = curr_track_info["item"]["artists"][0]["name"]
-    print(curr_song, curr_artist)
-    print(get_lyrics(curr_song, curr_artist))
+    if curr_track_info:
+        curr_song = curr_track_info['item']['name']
+        curr_artist = curr_track_info["item"]["artists"][0]["name"]
+        print(curr_song, "by", curr_artist)
+        print(get_lyrics(curr_song, curr_artist))
+    else:
+        print("No song currently playing")
     return
 
 def get_lyrics(title, artist):
+    #Genius authorization
     ID = "buf7LfAwdFqc9ZKchcwfrDyIU-Im0L9moVFcPgc41Cw4WNP5bPYW3BZjTMa-NCXv"
     SECRET = "YTWpLvuRE6IjXkIi5jpTqq9LB8tj67m3wHt5OyTC0Ibss9AhuA7mY79e6t7oPmotAmQEvfV-6L0MmlZ2v2xfoQ"
     TOKEN = "1d0BQQDMx7aQwC7SeNn2BiGHoXhG3ufNGzNUU3PsNb61_kpwG5-bhqkHGcy-zfOC"
@@ -31,7 +35,7 @@ def get_lyrics(title, artist):
     data = {'q': title + ' ' + artist}
     response = requests.get(search_url, data=data, headers=headers).json()
 
-    #get actual lyrics from html response
+    #check if Genius has lyric page
     for hit in response['response']['hits']:
         if artist.lower() in hit["result"]["primary_artist"]["name"].lower():
             lyrics_url = hit['result']['url']
@@ -39,6 +43,7 @@ def get_lyrics(title, artist):
         else:
             return "No Genius lyrics :("
 
+    #get actual lyrics from html response
     page_text = requests.get(lyrics_url).text
     html = BeautifulSoup(page_text, 'html.parser')
     lyrics = html.find('div', class_='lyrics').get_text()
