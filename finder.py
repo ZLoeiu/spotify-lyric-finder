@@ -17,6 +17,9 @@ def get_song():
     curr_track_info = sp.current_user_playing_track()
     if curr_track_info:
         curr_song = curr_track_info['item']['name']
+        if "(feat" in curr_song:
+            feat_start_index = curr_song.index("(feat")
+            curr_song = curr_song.replace(curr_song[feat_start_index:], '')
         curr_artist = curr_track_info["item"]["artists"][0]["name"]
         print(curr_song, "by", curr_artist)
         print(get_lyrics(curr_song, curr_artist))
